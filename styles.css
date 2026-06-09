@@ -10,6 +10,10 @@ body {
   color: #1f2a44;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 button,
 select {
   font: inherit;
@@ -337,6 +341,63 @@ button.active-mode {
   border-radius: 14px;
 }
 
+.cell-input-modal[hidden] {
+  display: none;
+}
+
+.cell-input-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.cell-input-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 36, 71, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+.cell-input-sheet {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(100%, 420px);
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -12px 36px rgba(25, 42, 82, 0.2);
+}
+
+.cell-input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cell-input-header h2 {
+  margin: 2px 0 0;
+  font-size: 1.2rem;
+}
+
+.cell-input-meta,
+.cell-input-description {
+  margin: 0;
+  color: #5d6c8b;
+}
+
+.cell-input-description {
+  margin-bottom: 14px;
+  font-size: 0.95rem;
+}
+
+.modal-number-pad button {
+  min-height: 58px;
+}
+
 @keyframes glow {
   0% {
     background: #fff2b5;
@@ -351,9 +412,15 @@ button.active-mode {
     grid-template-columns: 1fr;
   }
 
-  .side-panel,
-  .save-panel {
+  .board-panel {
     order: -1;
+  }
+}
+
+@media (min-width: 901px) {
+  .cell-input-sheet {
+    bottom: 24px;
+    border-radius: 24px;
   }
 }
 
@@ -373,5 +440,14 @@ button.active-mode {
 
   .toolbar {
     gap: 10px;
+  }
+
+  .side-panel > .number-pad {
+    display: none;
+  }
+
+  .cell-input-sheet {
+    width: 100%;
+    max-width: none;
   }
 }

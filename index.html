@@ -82,7 +82,7 @@
               <ul>
                 <li>每一行、每一列都要填入 1-9。</li>
                 <li>每个 3x3 宫内数字不能重复。</li>
-                <li>点击格子后，可使用键盘或右侧数字输入。</li>
+                <li>手机上点击可编辑格子，会直接弹出输入面板。</li>
                 <li>开启“备选模式”后，输入会作为格子里的候选小数字记录。</li>
                 <li>点击“手动设题”可自定义初始棋盘，再点“应用题面”开始游戏。</li>
               </ul>
@@ -93,6 +93,45 @@
         <p id="status" class="status" aria-live="polite">正在生成新题目...</p>
       </section>
     </main>
+
+    <div
+      id="cell-input-modal"
+      class="cell-input-modal"
+      hidden
+      aria-hidden="true"
+    >
+      <div class="cell-input-backdrop" data-action="close-input"></div>
+      <section
+        class="cell-input-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cell-input-title"
+        aria-describedby="cell-input-description"
+      >
+        <div class="cell-input-header">
+          <div>
+            <p id="cell-input-meta" class="cell-input-meta">当前未选中格子</p>
+            <h2 id="cell-input-title">输入数字</h2>
+          </div>
+          <button type="button" id="close-cell-input" class="accent">完成</button>
+        </div>
+        <p id="cell-input-description" class="cell-input-description">
+          选择一个数字填入当前格子，或删除现有内容。
+        </p>
+        <div class="number-pad modal-number-pad" id="modal-number-pad">
+          <button data-value="1">1</button>
+          <button data-value="2">2</button>
+          <button data-value="3">3</button>
+          <button data-value="4">4</button>
+          <button data-value="5">5</button>
+          <button data-value="6">6</button>
+          <button data-value="7">7</button>
+          <button data-value="8">8</button>
+          <button data-value="9">9</button>
+          <button data-action="clear" class="wide">删除内容</button>
+        </div>
+      </section>
+    </div>
 
     <script src="./script.js"></script>
   </body>

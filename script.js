@@ -15,6 +15,12 @@ const hintCellButton = document.querySelector("#hint-cell");
 const solveGameButton = document.querySelector("#solve-game");
 const numberPadElement = document.querySelector("#number-pad");
 const saveSlotsElement = document.querySelector("#save-slots");
+const cellInputModalElement = document.querySelector("#cell-input-modal");
+const modalNumberPadElement = document.querySelector("#modal-number-pad");
+const cellInputMetaElement = document.querySelector("#cell-input-meta");
+const cellInputTitleElement = document.querySelector("#cell-input-title");
+const cellInputDescriptionElement = document.querySelector("#cell-input-description");
+const closeCellInputButton = document.querySelector("#close-cell-input");
 
 const GRID_SIZE = 9;
 const BOX_SIZE = 3;
@@ -271,6 +277,73 @@ function getSelectedValue() {
   return currentBoard[selectedCell.row][selectedCell.col];
 }
 
+function shouldUsePopupInput() {
+  return (
+    window.matchMedia("(max-width: 640px)").matches ||
+    window.matchMedia("(pointer: coarse)").matches
+  );
+}
+
+function isCellInputModalOpen() {
+  return !cellInputModalElement.hidden;
+}
+
+function updateCellInputModal() {
+  if (!selectedCell) {
+    cellInputMetaElement.textContent = "当前未选中格子";
+    cellInputTitleElement.textContent = "输入数字";
+    cellInputDescriptionElement.textContent = "选择一个可编辑格子后再输入数字。";
+    return;
+  }
+
+  const { row, col } = selectedCell;
+  const value = currentBoard[row][col];
+  const editingNotes = notesMode && gameMode === "play";
+
+  cellInputMetaElement.textContent = `第 ${row + 1} 行第 ${col + 1} 列${
+    value === EMPTY ? "，当前为空" : `，当前为 ${value}`
+  }`;
+
+  if (gameMode === "edit") {
+    cellInputTitleElement.textContent = value === EMPTY ? "设置初始数字" : "修改初始数字";
+    cellInputDescriptionElement.textContent =
+      "点击数字可录入题面，或使用“删除内容”清空当前格子。";
+    return;
+  }
+
+  if (editingNotes) {
+    cellInputTitleElement.textContent = "编辑备选数字";
+    cellInputDescriptionElement.textContent =
+      "点击数字可添加或移除候选，完成后点“完成”返回棋盘。";
+    return;
+  }
+
+  cellInputTitleElement.textContent = value === EMPTY ? "输入数字" : "修改数字";
+  cellInputDescriptionElement.textContent =
+    "点击数字直接填入当前格子，或使用“删除内容”清空内容。";
+}
+
+function openCellInputModal() {
+  if (!selectedCell || !isCellEditable(selectedCell.row, selectedCell.col)) {
+    return;
+  }
+
+  updateCellInputModal();
+  cellInputModalElement.hidden = false;
+  cellInputModalElement.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+}
+
+function closeCellInputModal() {
+  if (cellInputModalElement.hidden) {
+    return;
+  }
+
+  cellInputModalElement.hidden = true;
+  cellInputModalElement.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+}
+
 function updateModeUI() {
   const editing = gameMode === "edit";
   manualModeButton.classList.toggle("active-mode", editing);
@@ -323,6 +396,7 @@ function applySnapshot(snapshot) {
   }
 
   saveMode = false;
+  closeCellInputModal();
   updateModeUI();
   renderSaveSlots();
   renderBoard();
@@ -439,11 +513,22 @@ function renderBoard() {
       boardElement.appendChild(cell);
     }
   }
+
+  if (isCellInputModalOpen()) {
+    updateCellInputModal();
+  }
 }
 
 function selectCell(row, col) {
   selectedCell = { row, col };
   renderBoard();
+
+  if (shouldUsePopupInput() && isCellEditable(row, col)) {
+    openCellInputModal();
+    return;
+  }
+
+  closeCellInputModal();
 }
 
 function isCompleted() {
@@ -459,7 +544,7 @@ function isCompleted() {
 
 function updateCell(row, col, value) {
   if (gameMode === "play" && puzzleBoard[row][col] !== EMPTY) {
-    return;
+    return false;
   }
 
   currentBoard[row][col] = value;
@@ -471,10 +556,13 @@ function updateCell(row, col, value) {
   }
   renderBoard();
 
-  if (gameMode === "play" && isCompleted()) {
+  const completed = gameMode === "play" && isCompleted();
+  if (completed) {
     stopTimer();
     setStatus(`恭喜，已完成本局数独，用时 ${formatTime(elapsedSeconds)}。`);
   }
+
+  return completed;
 }
 
 function clearSelectedCell() {
@@ -482,23 +570,24 @@ function clearSelectedCell() {
     setStatus(
       gameMode === "edit" ? "请先选择一个要设置的格子。" : "请先选择一个可编辑的空格。"
     );
-    return;
+    return false;
   }
 
   clearCellNotes(selectedCell.row, selectedCell.col);
   updateCell(selectedCell.row, selectedCell.col, EMPTY);
   setStatus(gameMode === "edit" ? "已清空当前设题格子。" : "已清空当前格子。");
+  return true;
 }
 
 function toggleSelectedNote(value) {
   if (!selectedCell || !isCellEditable(selectedCell.row, selectedCell.col)) {
     setStatus("请先选择一个可编辑的空格。");
-    return;
+    return false;
   }
 
   if (gameMode !== "play") {
     setStatus("手动设题模式下不支持备选数字。");
-    return;
+    return false;
   }
 
   if (currentBoard[selectedCell.row][selectedCell.col] !== EMPTY) {
@@ -515,6 +604,7 @@ function toggleSelectedNote(value) {
   }
 
   renderBoard();
+  return true;
 }
 
 function fillSelectedCell(value) {
@@ -522,18 +612,21 @@ function fillSelectedCell(value) {
     setStatus(
       gameMode === "edit" ? "请先选择一个要设置的格子。" : "请先选择一个可编辑的空格。"
     );
-    return;
+    return false;
   }
 
   if (notesMode && gameMode === "play") {
-    toggleSelectedNote(value);
-    return;
+    return toggleSelectedNote(value);
   }
 
-  updateCell(selectedCell.row, selectedCell.col, value);
+  const completed = updateCell(selectedCell.row, selectedCell.col, value);
   if (gameMode === "edit") {
     setStatus(`已将第 ${selectedCell.row + 1} 行第 ${selectedCell.col + 1} 列设为 ${value}。`);
-    return;
+    return true;
+  }
+
+  if (completed) {
+    return true;
   }
 
   if (value === solutionBoard[selectedCell.row][selectedCell.col]) {
@@ -541,6 +634,8 @@ function fillSelectedCell(value) {
   } else {
     setStatus(`已填入 ${value}，当前与答案不一致。`);
   }
+
+  return true;
 }
 
 function highlightCell(row, col) {
@@ -570,6 +665,7 @@ function createGame() {
   gameMode = "play";
   notesMode = false;
   saveMode = false;
+  closeCellInputModal();
   timerElement.textContent = formatTime(elapsedSeconds);
   startTimer();
   updateModeUI();
@@ -589,6 +685,7 @@ function enterManualMode() {
   gameMode = "edit";
   notesMode = false;
   saveMode = false;
+  closeCellInputModal();
   timerElement.textContent = formatTime(elapsedSeconds);
   updateModeUI();
   renderSaveSlots();
@@ -605,6 +702,7 @@ function clearManualBoard() {
   currentBoard = createEmptyBoard();
   clearAllNotes();
   selectedCell = null;
+  closeCellInputModal();
   renderBoard();
   setStatus("题面已清空，可以重新录入。");
 }
@@ -650,6 +748,7 @@ function applyManualBoard() {
   gameMode = "play";
   notesMode = false;
   saveMode = false;
+  closeCellInputModal();
   timerElement.textContent = formatTime(elapsedSeconds);
   startTimer();
   updateModeUI();
@@ -668,6 +767,7 @@ function resetGame() {
   clearAllNotes();
   selectedCell = null;
   elapsedSeconds = 0;
+  closeCellInputModal();
   timerElement.textContent = formatTime(elapsedSeconds);
   startTimer();
   renderBoard();
@@ -760,6 +860,7 @@ function solveGame() {
   clearAllNotes();
   selectedCell = null;
   stopTimer();
+  closeCellInputModal();
   renderBoard();
   setStatus("已显示完整答案。");
 }
@@ -772,6 +873,9 @@ function toggleNotesMode() {
 
   notesMode = !notesMode;
   updateModeUI();
+  if (isCellInputModalOpen()) {
+    updateCellInputModal();
+  }
   setStatus(notesMode ? "已开启备选模式。" : "已关闭备选模式。");
 }
 
@@ -823,6 +927,11 @@ function handleKeyboardInput(event) {
     return;
   }
 
+  if (event.key === "Escape" && isCellInputModalOpen()) {
+    closeCellInputModal();
+    return;
+  }
+
   if (!selectedCell) {
     return;
   }
@@ -856,6 +965,40 @@ numberPadElement.addEventListener("click", (event) => {
   }
 });
 
+modalNumberPadElement.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) {
+    return;
+  }
+
+  const value = button.dataset.value;
+  const action = button.dataset.action;
+  let changed = false;
+
+  if (action === "clear") {
+    changed = clearSelectedCell();
+  } else if (value) {
+    changed = fillSelectedCell(Number(value));
+  }
+
+  if (changed && !(notesMode && gameMode === "play")) {
+    closeCellInputModal();
+  } else if (isCellInputModalOpen()) {
+    updateCellInputModal();
+  }
+});
+
+cellInputModalElement.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  if (target.dataset.action === "close-input") {
+    closeCellInputModal();
+  }
+});
+
 saveSlotsElement.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-slot]");
   if (!button) {
@@ -876,7 +1019,13 @@ resetGameButton.addEventListener("click", resetGame);
 checkBoardButton.addEventListener("click", checkBoard);
 hintCellButton.addEventListener("click", giveHint);
 solveGameButton.addEventListener("click", solveGame);
+closeCellInputButton.addEventListener("click", closeCellInputModal);
 window.addEventListener("keydown", handleKeyboardInput);
+window.addEventListener("resize", () => {
+  if (!shouldUsePopupInput()) {
+    closeCellInputModal();
+  }
+});
 
 updateModeUI();
 renderSaveSlots();
