@@ -278,6 +278,9 @@ function getSelectedValue() {
 }
 
 function shouldUsePopupInput() {
+  // #region debug-point A:popup-env-check
+  fetch("http://198.18.0.1:7777/event",{method:"POST",body:JSON.stringify({sessionId:"mobile-popup-menu",runId:"pre-fix",hypothesisId:"A",location:"script.js:280",msg:"[DEBUG] shouldUsePopupInput called",data:{maxWidth:window.matchMedia("(max-width: 640px)").matches,pointerCoarse:window.matchMedia("(pointer: coarse)").matches,userAgent:navigator.userAgent,innerWidth:window.innerWidth},ts:Date.now()})}).catch(()=>{});
+  // #endregion
   return (
     window.matchMedia("(max-width: 640px)").matches ||
     window.matchMedia("(pointer: coarse)").matches
@@ -325,6 +328,9 @@ function updateCellInputModal() {
 
 function openCellInputModal() {
   if (!selectedCell || !isCellEditable(selectedCell.row, selectedCell.col)) {
+    // #region debug-point B:open-modal-blocked
+    fetch("http://198.18.0.1:7777/event",{method:"POST",body:JSON.stringify({sessionId:"mobile-popup-menu",runId:"pre-fix",hypothesisId:"B",location:"script.js:327",msg:"[DEBUG] openCellInputModal blocked",data:{selectedCell,gameMode,puzzleValue:selectedCell?puzzleBoard[selectedCell.row][selectedCell.col]:null},ts:Date.now()})}).catch(()=>{});
+    // #endregion
     return;
   }
 
@@ -332,6 +338,9 @@ function openCellInputModal() {
   cellInputModalElement.hidden = false;
   cellInputModalElement.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
+  // #region debug-point C:open-modal-success
+  fetch("http://198.18.0.1:7777/event",{method:"POST",body:JSON.stringify({sessionId:"mobile-popup-menu",runId:"pre-fix",hypothesisId:"C",location:"script.js:336",msg:"[DEBUG] openCellInputModal applied DOM state",data:{selectedCell,hidden:cellInputModalElement.hidden,ariaHidden:cellInputModalElement.getAttribute("aria-hidden"),bodyClassList:[...document.body.classList]},ts:Date.now()})}).catch(()=>{});
+  // #endregion
 }
 
 function closeCellInputModal() {
@@ -522,13 +531,21 @@ function renderBoard() {
 function selectCell(row, col) {
   selectedCell = { row, col };
   renderBoard();
+  const popupEnabled = shouldUsePopupInput();
+  const editable = isCellEditable(row, col);
+  // #region debug-point A:select-cell-branch
+  fetch("http://198.18.0.1:7777/event",{method:"POST",body:JSON.stringify({sessionId:"mobile-popup-menu",runId:"pre-fix",hypothesisId:popupEnabled?"C":"A",location:"script.js:529",msg:"[DEBUG] selectCell branch evaluated",data:{row,col,popupEnabled,editable,gameMode,puzzleValue:puzzleBoard[row][col],currentValue:currentBoard[row][col]},ts:Date.now()})}).catch(()=>{});
+  // #endregion
 
-  if (shouldUsePopupInput() && isCellEditable(row, col)) {
+  if (popupEnabled && editable) {
     openCellInputModal();
     return;
   }
 
   closeCellInputModal();
+  // #region debug-point D:close-modal-after-select
+  fetch("http://198.18.0.1:7777/event",{method:"POST",body:JSON.stringify({sessionId:"mobile-popup-menu",runId:"pre-fix",hypothesisId:"D",location:"script.js:538",msg:"[DEBUG] modal closed after selectCell branch",data:{row,col,popupEnabled,editable,hidden:cellInputModalElement.hidden,computedDisplay:getComputedStyle(cellInputModalElement).display},ts:Date.now()})}).catch(()=>{});
+  // #endregion
 }
 
 function isCompleted() {
@@ -995,6 +1012,9 @@ cellInputModalElement.addEventListener("click", (event) => {
   }
 
   if (target.dataset.action === "close-input") {
+    // #region debug-point D:backdrop-close
+    fetch("http://198.18.0.1:7777/event",{method:"POST",body:JSON.stringify({sessionId:"mobile-popup-menu",runId:"pre-fix",hypothesisId:"D",location:"script.js:1000",msg:"[DEBUG] cell input modal backdrop close",data:{targetAction:target.dataset.action},ts:Date.now()})}).catch(()=>{});
+    // #endregion
     closeCellInputModal();
   }
 });
