@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数独游戏</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel">
+        <div class="heading">
+          <div>
+            <p class="eyebrow">Web Sudoku</p>
+            <h1>数独游戏</h1>
+            <p class="subtitle">支持随机出题、手动设题、备选数字、提示、校验、重开与自动求解。</p>
+          </div>
+          <div class="timer-wrap">
+            <span class="label">用时</span>
+            <strong id="timer">00:00</strong>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <label class="field">
+            <span>难度</span>
+            <select id="difficulty">
+              <option value="easy">简单</option>
+              <option value="medium" selected>中等</option>
+              <option value="hard">困难</option>
+            </select>
+          </label>
+          <button id="new-game" class="primary">新游戏</button>
+          <button id="manual-mode">手动设题</button>
+          <button id="notes-mode">备选模式</button>
+          <button id="apply-manual" class="accent">应用题面</button>
+          <button id="clear-manual">清空题面</button>
+          <button id="reset-game">重置</button>
+          <button id="check-board">校验</button>
+          <button id="hint-cell">提示</button>
+          <button id="solve-game">求解</button>
+        </div>
+
+        <div class="game-layout">
+          <aside class="save-panel">
+            <div class="save-box">
+              <h2>存档</h2>
+              <div id="save-slots" class="save-slots">
+                <button data-slot="0">空白1</button>
+                <button data-slot="1">空白2</button>
+                <button data-slot="2">空白3</button>
+                <button data-slot="3">空白4</button>
+                <button data-slot="4">空白5</button>
+              </div>
+              <div class="save-actions">
+                <button id="save-state" class="accent">保存</button>
+                <button id="load-state">读取</button>
+              </div>
+            </div>
+          </aside>
+
+          <section class="board-panel">
+            <div id="board" class="board" aria-label="数独棋盘"></div>
+          </section>
+
+          <aside class="side-panel">
+            <div class="number-pad" id="number-pad">
+              <button data-value="1">1</button>
+              <button data-value="2">2</button>
+              <button data-value="3">3</button>
+              <button data-value="4">4</button>
+              <button data-value="5">5</button>
+              <button data-value="6">6</button>
+              <button data-value="7">7</button>
+              <button data-value="8">8</button>
+              <button data-value="9">9</button>
+              <button data-action="clear" class="wide">清空</button>
+            </div>
+
+            <div class="tips">
+              <h2>玩法说明</h2>
+              <ul>
+                <li>每一行、每一列都要填入 1-9。</li>
+                <li>每个 3x3 宫内数字不能重复。</li>
+                <li>点击格子后，可使用键盘或右侧数字输入。</li>
+                <li>开启“备选模式”后，输入会作为格子里的候选小数字记录。</li>
+                <li>点击“手动设题”可自定义初始棋盘，再点“应用题面”开始游戏。</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+
+        <p id="status" class="status" aria-live="polite">正在生成新题目...</p>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
