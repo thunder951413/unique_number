@@ -231,6 +231,9 @@ button.active-mode {
   color: #20304f;
   font-size: clamp(1rem, 2.2vw, 1.5rem);
   font-weight: 600;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .cell.has-notes {
