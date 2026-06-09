@@ -44,7 +44,10 @@ let notesMode = false;
 let saveMode = false;
 let selectedSaveSlot = null;
 let lastPointerSelectionTime = 0;
+let longPressTimerId = null;
+let longPressHandled = false;
 const saveSlots = Array(5).fill(null);
+const LONG_PRESS_DELAY = 520;
 
 function createEmptyBoard() {
   return Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(EMPTY));
@@ -487,11 +490,49 @@ function renderCellContent(cell, row, col, value, selectedValue) {
   cell.appendChild(noteGrid);
 }
 
+function clearLongPressTimer() {
+  clearTimeout(longPressTimerId);
+  longPressTimerId = null;
+}
+
 function bindCellSelection(cell, row, col) {
+  cell.addEventListener("pointerdown", (event) => {
+    if (!shouldUsePopupInput()) {
+      return;
+    }
+
+    event.preventDefault();
+    longPressHandled = false;
+    clearLongPressTimer();
+    longPressTimerId = window.setTimeout(() => {
+      longPressHandled = true;
+      lastPointerSelectionTime = Date.now();
+      selectCell(row, col, true);
+    }, LONG_PRESS_DELAY);
+  });
+
   cell.addEventListener("pointerup", (event) => {
     event.preventDefault();
+    clearLongPressTimer();
     lastPointerSelectionTime = Date.now();
-    selectCell(row, col);
+
+    if (longPressHandled) {
+      longPressHandled = false;
+      return;
+    }
+
+    selectCell(row, col, false);
+  });
+
+  cell.addEventListener("pointercancel", () => {
+    clearLongPressTimer();
+    longPressHandled = false;
+  });
+
+  cell.addEventListener("contextmenu", (event) => {
+    if (shouldUsePopupInput()) {
+      event.preventDefault();
+    }
   });
 
   cell.addEventListener("click", () => {
@@ -499,7 +540,7 @@ function bindCellSelection(cell, row, col) {
       return;
     }
 
-    selectCell(row, col);
+    selectCell(row, col, false);
   });
 }
 
@@ -562,13 +603,13 @@ function renderBoard() {
   }
 }
 
-function selectCell(row, col) {
+function selectCell(row, col, openInput = false) {
   selectedCell = { row, col };
   renderBoard();
   const popupEnabled = shouldUsePopupInput();
   const editable = isCellEditable(row, col);
 
-  if (popupEnabled && editable) {
+  if (popupEnabled && editable && openInput) {
     openCellInputModal();
     return;
   }
