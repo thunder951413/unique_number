@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>数独游戏</title>
-    <link rel="stylesheet" href="./styles.css?v=2026.06.09.2" />
+    <link rel="stylesheet" href="./styles.css?v=2026.06.09.3" />
   </head>
   <body>
     <main class="app">
@@ -14,7 +14,7 @@
             <p class="eyebrow">Web Sudoku</p>
             <div class="title-row">
               <h1>数独游戏</h1>
-              <span class="version-badge">v2026.06.09.2</span>
+              <span class="version-badge">v2026.06.09.3</span>
             </div>
             <p class="subtitle">支持随机出题、手动设题、备选数字、提示、校验、重开与自动求解。</p>
           </div>
@@ -124,6 +124,15 @@
         <p id="cell-input-description" class="cell-input-description">
           选择一个数字填入当前格子，或删除现有内容。
         </p>
+        <div
+          id="modal-input-mode"
+          class="input-mode-toggle"
+          role="group"
+          aria-label="输入模式"
+        >
+          <button type="button" data-input-mode="value" aria-pressed="true">填数字</button>
+          <button type="button" data-input-mode="notes" aria-pressed="false">备选</button>
+        </div>
         <div class="number-pad modal-number-pad" id="modal-number-pad">
           <button data-value="1">1</button>
           <button data-value="2">2</button>
@@ -139,6 +148,6 @@
       </section>
     </div>
 
-    <script src="./script.js?v=2026.06.09.2"></script>
+    <script src="./script.js?v=2026.06.09.3"></script>
   </body>
 </html>

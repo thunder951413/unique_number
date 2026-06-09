@@ -432,6 +432,36 @@ button.active-mode {
   font-size: 0.95rem;
 }
 
+.input-mode-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: #eef4ff;
+  border: 1px solid #d7e2ff;
+  border-radius: 12px;
+}
+
+.input-mode-toggle[hidden] {
+  display: none;
+}
+
+.input-mode-toggle button {
+  min-height: 40px;
+  padding: 8px 10px;
+  border-color: transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #425170;
+}
+
+.input-mode-toggle button.active-input-mode {
+  background: #ffffff;
+  color: #3152c4;
+  box-shadow: 0 2px 8px rgba(49, 82, 196, 0.14);
+}
+
 .modal-number-pad button {
   min-height: 58px;
 }

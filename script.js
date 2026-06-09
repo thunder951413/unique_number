@@ -17,6 +17,7 @@ const numberPadElement = document.querySelector("#number-pad");
 const saveSlotsElement = document.querySelector("#save-slots");
 const cellInputModalElement = document.querySelector("#cell-input-modal");
 const modalNumberPadElement = document.querySelector("#modal-number-pad");
+const modalInputModeElement = document.querySelector("#modal-input-mode");
 const cellInputMetaElement = document.querySelector("#cell-input-meta");
 const cellInputTitleElement = document.querySelector("#cell-input-title");
 const cellInputDescriptionElement = document.querySelector("#cell-input-description");
@@ -290,6 +291,17 @@ function isCellInputModalOpen() {
 }
 
 function updateCellInputModal() {
+  modalInputModeElement.hidden = gameMode !== "play";
+  modalInputModeElement
+    .querySelectorAll("button[data-input-mode]")
+    .forEach((button) => {
+      const active =
+        (button.dataset.inputMode === "notes" && notesMode) ||
+        (button.dataset.inputMode === "value" && !notesMode);
+      button.classList.toggle("active-input-mode", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+
   if (!selectedCell) {
     cellInputMetaElement.textContent = "当前未选中格子";
     cellInputTitleElement.textContent = "输入数字";
@@ -353,6 +365,20 @@ function updateModeUI() {
   applyManualButton.disabled = !editing;
   clearManualButton.disabled = !editing;
   loadStateButton.disabled = selectedSaveSlot === null || saveSlots[selectedSaveSlot] === null;
+}
+
+function setNotesMode(enabled) {
+  if (gameMode !== "play") {
+    setStatus("手动设题模式下不支持备选数字。");
+    return;
+  }
+
+  notesMode = enabled;
+  updateModeUI();
+  if (isCellInputModalOpen()) {
+    updateCellInputModal();
+  }
+  setStatus(notesMode ? "已开启备选模式。" : "已关闭备选模式。");
 }
 
 function renderSaveSlots() {
@@ -885,17 +911,7 @@ function solveGame() {
 }
 
 function toggleNotesMode() {
-  if (gameMode !== "play") {
-    setStatus("手动设题模式下不支持备选数字。");
-    return;
-  }
-
-  notesMode = !notesMode;
-  updateModeUI();
-  if (isCellInputModalOpen()) {
-    updateCellInputModal();
-  }
-  setStatus(notesMode ? "已开启备选模式。" : "已关闭备选模式。");
+  setNotesMode(!notesMode);
 }
 
 function handleSaveSlotSelection(slotIndex) {
@@ -1005,6 +1021,15 @@ modalNumberPadElement.addEventListener("click", (event) => {
   } else if (isCellInputModalOpen()) {
     updateCellInputModal();
   }
+});
+
+modalInputModeElement.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-input-mode]");
+  if (!button) {
+    return;
+  }
+
+  setNotesMode(button.dataset.inputMode === "notes");
 });
 
 cellInputModalElement.addEventListener("click", (event) => {
