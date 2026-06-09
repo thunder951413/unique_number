@@ -190,16 +190,30 @@ button.active-mode {
   justify-content: center;
 }
 
+.board-wrap {
+  width: min(100%, 560px);
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(9, minmax(34px, 1fr));
   grid-template-rows: repeat(9, minmax(34px, 1fr));
-  width: min(100%, 560px);
+  width: 100%;
   aspect-ratio: 1;
   background: white;
   border: 3px solid #2f406f;
   border-radius: 16px;
   overflow: hidden;
+}
+
+.mobile-input-tip {
+  display: none;
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  color: #425170;
+  background: #eef4ff;
+  border-radius: 12px;
 }
 
 .cell {
@@ -408,12 +422,35 @@ button.active-mode {
 }
 
 @media (max-width: 900px) {
+  .app {
+    padding: 14px;
+  }
+
+  .panel {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
   .game-layout {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .board-panel {
     order: -1;
+  }
+
+  .save-box,
+  .tips {
+    padding: 14px;
+  }
+
+  .side-panel > .number-pad {
+    display: none;
+  }
+
+  .mobile-input-tip {
+    display: block;
   }
 }
 
@@ -426,28 +463,65 @@ button.active-mode {
 
 @media (max-width: 640px) {
   .app {
-    padding: 12px;
+    padding: 0;
   }
 
   .panel {
-    padding: 16px;
-    border-radius: 18px;
+    padding: 14px;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
   }
 
   .heading {
     flex-direction: column;
+    gap: 12px;
   }
 
   .toolbar {
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
-  .side-panel > .number-pad {
-    display: none;
+  .field {
+    min-width: 0;
+    grid-column: span 2;
   }
 
   .cell-input-sheet {
     width: 100%;
     max-width: none;
+    padding-inline: 14px;
+  }
+
+  .cell-input-header {
+    align-items: flex-start;
+  }
+
+  .cell-input-header button {
+    flex-shrink: 0;
+  }
+
+  .modal-number-pad {
+    gap: 8px;
+  }
+
+  .modal-number-pad button {
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  .save-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .save-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tips ul {
+    gap: 6px;
   }
 }
